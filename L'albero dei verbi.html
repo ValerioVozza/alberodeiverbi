@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'albero dei verbi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: allegra, da gioco per bambini di quinta, chiara e incoraggiante
+   IDEA: una notte di dicembre in piazza: ogni risposta giusta appende una pallina
+   PICTURE: abete 3D che ruota sotto la neve, la stella arriva alla 25ª risposta
+   COLOUR and TYPE: blu notte, verde abete, oro; Fredoka per titoli, Nunito per il testo
+   LAYOUT: albero grande a sinistra, scheda-domanda di carta a destra; su telefono uno sopra l'altro */
+:root{color-scheme:dark;--night:#0b1f3a;--night2:#06122a;--pine:#1f7a4a;--gold:#f2c14e;--red:#d7263d;--paper:#fffaf0;--ink:#1b2233;--snow:#eef4ff}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 80% at 50% 0%,#17345e 0%,var(--night) 45%,var(--night2) 100%);color:var(--snow);font:17px/1.55 Nunito,system-ui,sans-serif;overflow-x:clip}
+header{max-width:1180px;margin:0 auto;padding:22px max(4vw,16px) 6px;display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px}
+h1{font:700 clamp(30px,4.6vw,46px)/1.05 Fredoka,sans-serif;margin:0;text-wrap:balance}
+h1 span{color:var(--gold)}
+.sub{margin:6px 0 0;color:#c4d3ee;font-size:16px}
+.hud{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.meter{display:grid;gap:4px;min-width:200px}
+.meter b{font:600 15px Fredoka,sans-serif;color:#c4d3ee;display:flex;justify-content:space-between;gap:12px}
+.meter b em{font-style:normal;color:var(--gold);white-space:nowrap}
+.bar{height:14px;border-radius:99px;background:#ffffff1f;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0a91f,var(--gold));border-radius:99px;transition:width .5s cubic-bezier(.3,1.4,.5,1)}
+.lives{display:flex;gap:6px}
+.lives span{width:22px;height:22px;border-radius:50%;border:2px solid #ffffff55;transition:background .3s,transform .3s}
+.lives span.x{background:var(--red);border-color:var(--red);transform:scale(1.1)}
+.stage{position:relative;max-width:1180px;margin:0 auto;padding:14px max(4vw,16px) 40px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+.fig{position:relative;height:clamp(360px,68vh,620px);border-radius:28px;overflow:hidden;background:radial-gradient(90% 70% at 50% 85%,#2b5788 0%,#132c52 55%,#0a1a33 100%);box-shadow:inset 0 0 0 1px #ffffff14,0 20px 50px #00000059}
+.fig canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fig .nogl{position:absolute;inset:auto 16px 16px;font-size:14px;color:#c4d3ee}
+.card{background:var(--paper);color:var(--ink);border-radius:24px;padding:clamp(20px,3vw,30px);box-shadow:0 20px 50px #00000059;position:relative}
+.tag{display:inline-block;font:600 14px Fredoka,sans-serif;color:#7a5a12;background:#fbe7b5;border-radius:99px;padding:3px 12px}
+.q{font:600 clamp(21px,2.4vw,26px)/1.25 Fredoka,sans-serif;margin:12px 0 18px;text-wrap:balance}
+.opts{display:grid;gap:10px}
+.opts button{font:700 18px Nunito,sans-serif;text-align:left;color:var(--ink);background:#fff;border:2px solid #e4dac3;border-radius:16px;min-height:56px;padding:12px 18px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s}
+.opts button:hover:not(:disabled){border-color:var(--pine);transform:translateY(-1px)}
+.opts button:focus-visible,.next:focus-visible,.again:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opts button:disabled{cursor:default}
+.opts button.ok{background:#e3f5e9;border-color:#2e9e5b;color:#145c33}
+.opts button.no{background:#fde4e7;border-color:var(--red);color:#8c1023}
+.fb{min-height:52px;margin:16px 0 0;font-size:17px}
+.fb strong{font-family:Fredoka,sans-serif;font-weight:600}
+.fb.good strong{color:#1f8a4c}.fb.bad strong{color:var(--red)}
+.next{margin-top:12px;font:600 18px Fredoka,sans-serif;color:#fff;background:var(--pine);border:0;border-radius:14px;min-height:50px;padding:10px 26px;cursor:pointer}
+.next[hidden]{display:none}
+.over{position:absolute;inset:14px max(4vw,16px) 40px;display:grid;place-items:center;background:#06122ad9;border-radius:28px;backdrop-filter:blur(3px);z-index:5;padding:20px}
+.over[hidden]{display:none}
+.box{max-width:460px;text-align:center;background:var(--paper);color:var(--ink);border-radius:24px;padding:30px 26px}
+.box h2{font:700 clamp(30px,4vw,40px)/1.05 Fredoka,sans-serif;margin:0 0 10px}
+.box p{margin:0 0 20px}
+.again{font:600 19px Fredoka,sans-serif;color:var(--ink);background:var(--gold);border:0;border-radius:14px;min-height:52px;padding:10px 30px;cursor:pointer}
+.shake{animation:sh .45s}
+@keyframes sh{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@media(max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}.fig{height:clamp(300px,52vh,440px)}}
+@media(prefers-reduced-motion:reduce){.shake{animation:none}.bar i{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>L'albero dei <span>verbi</span></h1>
+    <p class="sub">Transitivo o intransitivo? Ogni risposta giusta è un addobbo in più.</p>
+  </div>
+  <div class="hud">
+    <div class="meter"><b>Addobbi <em id="cnt">0 / 25</em></b><div class="bar"><i id="bar"></i></div></div>
+    <div class="meter"><b>Errori <em id="ecnt">0 / 5</em></b><div class="lives" id="lives"></div></div>
+  </div>
+</header>
+
+<main class="stage">
+  <div class="fig" id="fig" aria-label="Albero di Natale in 3D che ruota"></div>
+  <section class="card" id="card" aria-live="polite">
+    <span class="tag" id="tag">Domanda 1</span>
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <p class="fb" id="fb"></p>
+    <button class="next" id="next" hidden>Avanti</button>
+  </section>
+  <div class="over" id="over" hidden>
+    <div class="box">
+      <h2 id="oTitle"></h2>
+      <p id="oText"></p>
+      <button class="again" id="again">Gioca ancora</button>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+{
+const TI = ["transitivo","intransitivo"], VF = ["Vero","Falso"], SN = ["Sì","No"];
+const ti = (s,v,t,e) => ({q:`Nella frase «${s}» il verbo «${v}» è…`, o:TI, a:t?0:1, e, k:1});
+const Q = [
+  ti("Il gatto dorme sul divano.","dorme",0,"Dorme… che cosa? Nessuna risposta: l'azione resta nel gatto."),
+  ti("Marta legge un libro di avventure.","legge",1,"Legge che cosa? Un libro: è il complemento oggetto."),
+  ti("I bambini corrono nel cortile.","corrono",0,"«Nel cortile» dice dove, non che cosa."),
+  ti("Il nonno ripara la bicicletta.","ripara",1,"Ripara che cosa? La bicicletta."),
+  ti("Le foglie cadono in autunno.","cadono",0,"Cadere non ha mai un complemento oggetto."),
+  ti("Paolo scrive una lettera alla zia.","scrive",1,"Scrive che cosa? Una lettera."),
+  ti("Il sole tramonta dietro la collina.","tramonta",0,"«Dietro la collina» dice dove: niente complemento oggetto."),
+  ti("Anna saluta la nonna.","saluta",1,"Saluta chi? La nonna."),
+  ti("Il bambino piange forte.","piange",0,"«Forte» dice come: l'azione resta nel bambino."),
+  ti("La lumaca striscia lentamente.","striscia",0,"Striscia… che cosa? Nessuna risposta."),
+  ti("Tommaso disegna un drago.","disegna",1,"Disegna che cosa? Un drago."),
+  ti("Le rondini tornano in primavera.","tornano",0,"«In primavera» dice quando, non che cosa."),
+  ti("Il papà lava la macchina.","lava",1,"Lava che cosa? La macchina."),
+  ti("L'autobus arriva subito.","arriva",0,"Arrivare è intransitivo."),
+  ti("La maestra apre la finestra.","apre",1,"Apre che cosa? La finestra."),
+  ti("Il pallone rotola giù.","rotola",0,"«Giù» dice dove: niente complemento oggetto."),
+  ti("Il vigile ferma le auto.","ferma",1,"Ferma che cosa? Le auto."),
+  {q:"«La mamma prepara la torta.» Qual è il complemento oggetto?", o:["la torta","la mamma","prepara","Non c'è"], a:0, e:"Prepara che cosa? La torta."},
+  {q:"«Il treno parte alle otto.» Qual è il complemento oggetto?", o:["alle otto","il treno","Non c'è"], a:2, e:"Partire è intransitivo: «alle otto» dice quando."},
+  {q:"«Giulia innaffia i fiori.» Qual è il complemento oggetto?", o:["i fiori","Giulia","innaffia","Non c'è"], a:0, e:"Innaffia che cosa? I fiori."},
+  {q:"«Noi arriviamo in ritardo.» Qual è il complemento oggetto?", o:["in ritardo","noi","Non c'è"], a:2, e:"Arrivare è intransitivo: non ha complemento oggetto."},
+  {q:"«Il cane rosicchia un osso.» Qual è il complemento oggetto?", o:["un osso","il cane","rosicchia","Non c'è"], a:0, e:"Rosicchia che cosa? Un osso."},
+  {q:"«Elisa dipinge un paesaggio.» Qual è il complemento oggetto?", o:["un paesaggio","Elisa","Non c'è"], a:0, e:"Dipinge che cosa? Un paesaggio."},
+  {q:"Trova l'intruso: prendere, comprare, dormire, spedire.", o:["dormire","prendere","comprare","spedire"], a:0, e:"Dormire è l'unico intransitivo."},
+  {q:"Trova l'intruso: uscire, entrare, nascere, portare.", o:["portare","uscire","entrare","nascere"], a:0, e:"Portare è l'unico transitivo."},
+  {q:"Trova l'intruso: lavare, asciugare, stirare, sbocciare.", o:["sbocciare","lavare","asciugare","stirare"], a:0, e:"Sbocciare è l'unico intransitivo."},
+  {q:"Trova l'intruso: arrivare, morire, restare, spostare.", o:["spostare","arrivare","morire","restare"], a:0, e:"Spostare è l'unico transitivo."},
+  {q:"Vero o falso? «Dormire» è un verbo transitivo.", o:VF, a:1, e:"Falso: si dorme, ma non si dorme «qualcosa»."},
+  {q:"Vero o falso? Il complemento oggetto risponde alla domanda «chi? che cosa?».", o:VF, a:0, e:"Vero: è la domanda da fare dopo il verbo."},
+  {q:"Vero o falso? In «Il gatto salta sul muretto» c'è un complemento oggetto.", o:VF, a:1, e:"Falso: «sul muretto» dice dove."},
+  {q:"Vero o falso? Solo i verbi transitivi possono avere la forma passiva.", o:VF, a:0, e:"Vero: serve un complemento oggetto che diventi soggetto."},
+  {q:"Qual è la forma passiva di «Il cuoco prepara la pasta»?", o:["La pasta è preparata dal cuoco.","Il cuoco è preparato dalla pasta.","La pasta prepara il cuoco.","Non si può fare."], a:0, e:"Il complemento oggetto (la pasta) diventa soggetto."},
+  {q:"«Il bambino ride.» Si può volgere al passivo?", o:SN, a:1, e:"No: ridere è intransitivo."},
+  {q:"Qual è la forma passiva di «Il vento spinge la barca»?", o:["La barca è spinta dal vento.","Il vento è spinto dalla barca.","Non si può fare."], a:0, e:"La barca diventa soggetto, il vento diventa «dal vento»."},
+  {q:"«La neve cade.» Si può volgere al passivo?", o:SN, a:1, e:"No: cadere è intransitivo."},
+  {q:"Qual è la forma attiva di «La porta è chiusa dal custode»?", o:["Il custode chiude la porta.","La porta chiude il custode.","Il custode è chiuso dalla porta."], a:0, e:"Chi fa l'azione (il custode) torna soggetto."},
+  {q:"Completa: «Il cane ___ al postino.»", o:["abbaia","nuota","vola","brilla"], a:0, e:"Il cane abbaia: un verbo intransitivo."},
+  {q:"Completa: «L'aquila ___ sopra le montagne.»", o:["vola","scivola","abbaia","nuota"], a:0, e:"L'aquila vola: un verbo intransitivo."},
+  {q:"Quale complemento oggetto va bene? «Il pittore dipinge ___.»", o:["un ritratto","in giardino","velocemente","ieri"], a:0, e:"Dipinge che cosa? Un ritratto."},
+  {q:"Quale frase è corretta?", o:["Il bambino è caduto dalla scala.","Il bambino è caduto la scala."], a:0, e:"Cadere è intransitivo: serve «dalla»."},
+  {q:"Quale frase è corretta?", o:["Marco è andato a scuola.","Marco è andato la scuola."], a:0, e:"Andare è intransitivo: serve «a»."},
+  {q:"Quale frase è corretta?", o:["Il treno parte dalla stazione.","Il treno parte la stazione."], a:0, e:"Partire è intransitivo: serve «dalla»."},
+  {q:"Quale verbo si usa sia con sia senza complemento oggetto?", o:["studiare","nascere","arrivare"], a:0, e:"«Studio la storia» e «Studio in camera»."},
+  {q:"In quale frase «mangia» ha il complemento oggetto?", o:["Luca mangia una mela.","Luca mangia in fretta.","Luca mangia alle otto."], a:0, e:"Mangia che cosa? Una mela."},
+  {q:"«Sara canta nel coro.» Il verbo ha un complemento oggetto?", o:SN, a:1, e:"No: «nel coro» dice dove."},
+  {q:"Che cosa si può sbucciare?", o:["l'arancia","la chitarra","la luce"], a:0, e:"Sbucciare è transitivo: si sbuccia l'arancia."},
+  {q:"Che cosa si può suonare?", o:["la chitarra","la lettera","l'arancia"], a:0, e:"Suonare la chitarra: la chitarra è il complemento oggetto."},
+  {q:"Quale di questi verbi è transitivo?", o:["costruire","nascere","ridere","cadere"], a:0, e:"Si costruisce qualcosa: una casa, un castello…"},
+  {q:"Quale di questi verbi è intransitivo?", o:["arrivare","chiudere","tagliare","spingere"], a:0, e:"Si arriva, ma non si arriva «qualcosa»."},
+  {q:"Quale di questi verbi è transitivo?", o:["colorare","sorridere","andare","sbadigliare"], a:0, e:"Si colora qualcosa: un disegno."}
+];
+const GOAL = 25, MAXERR = 5;
+const $ = id => document.getElementById(id);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+let deck = [], cur = null, ok = 0, err = 0, n = 0, over = false;
+
+/* ---------- Albero 3D ---------- */
+const tree = (() => {
+  const fig = $('fig');
+  const stub = { reset(){}, add(){}, shake(){}, strip(cb){ setTimeout(cb, 300); }, win(){} };
+  if (!window.THREE) { fig.innerHTML = '<p class="nogl">L\'albero 3D non si è caricato, ma il gioco funziona lo stesso.</p>'; return stub; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+  catch (e) { fig.innerHTML = '<p class="nogl">Questo dispositivo non mostra il 3D, ma il gioco funziona lo stesso.</p>'; return stub; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  fig.appendChild(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+  camera.position.set(0, 2.3, 8); camera.lookAt(0, 1.75, 0);
+  scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x0b1f3a, 0.75));
+  const sun = new THREE.DirectionalLight(0xfff1d6, 0.95); sun.position.set(3, 6, 5); scene.add(sun);
+  const warm = new THREE.PointLight(0xffc86b, 0, 6); warm.position.set(0, 3.5, 0.6); scene.add(warm);
+
+  const ground = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.9, 0.16, 48), new THREE.MeshStandardMaterial({ color: 0xf3f7ff, roughness: 0.9 }));
+  ground.position.y = -0.08; scene.add(ground);
+  const g = new THREE.Group(); scene.add(g);
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.23, 0.5, 14), new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.9 }));
+  trunk.position.y = 0.25; g.add(trunk);
+  const L = [[1.5, 1.5, 1.15, 0x1f7a4a], [1.15, 1.3, 1.95, 0x23874f], [0.8, 1.1, 2.75, 0x2a9658]];
+  L.forEach(([r, h, c, col]) => {
+    const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 11), new THREE.MeshStandardMaterial({ color: col, roughness: 0.75, flatShading: true }));
+    m.position.y = c; g.add(m);
+    const snow = new THREE.Mesh(new THREE.ConeGeometry(r * 0.32, h * 0.3, 11), new THREE.MeshStandardMaterial({ color: 0xf3f7ff, roughness: 0.9, flatShading: true }));
+    snow.position.y = c + h * 0.36; g.add(snow);
+  });
+  const surfR = y => Math.max(0, ...L.map(([r, h, c]) => (y >= c - h / 2 && y <= c + h / 2) ? r * (c + h / 2 - y) / h : 0));
+  const COLS = [0xd7263d, 0xf2c14e, 0x3a86ff, 0xdfe6f0, 0x9b5de5, 0xff7eb6];
+  const slots = Array.from({ length: GOAL - 1 }, (_, i) => {
+    const y = 0.55 + (i / (GOAL - 2)) * 2.45, a = i * 2.399, r = surfR(y) + 0.06;
+    return { x: Math.cos(a) * r, y, z: Math.sin(a) * r, s: 0.13 - 0.045 * (i / (GOAL - 2)) };
+  });
+  const ballGeo = new THREE.SphereGeometry(1, 20, 14), capGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.35, 10);
+  const capMat = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.8, roughness: 0.3 });
+  let orns = [], star = null, t = 0, shakeT = 0, won = false;
+
+  const shape = new THREE.Shape();
+  for (let i = 0; i < 10; i++) { const r = i % 2 ? 0.1 : 0.25, a = Math.PI / 2 + i * Math.PI / 5; i ? shape.lineTo(Math.cos(a) * r, Math.sin(a) * r) : shape.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+  const starGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 }); starGeo.center();
+
+  function add(k) {
+    if (k > GOAL) return;
+    if (k === GOAL) {
+      const mat = new THREE.MeshStandardMaterial({ color: 0xffd34d, emissive: 0xffb300, emissiveIntensity: 0.8, metalness: 0.5, roughness: 0.3, transparent: true });
+      star = new THREE.Mesh(starGeo, mat); star.position.y = 3.48; star.scale.setScalar(0.001); star.userData = { born: t, base: 1.25 };
+      g.add(star); orns.push(star); warm.intensity = 1.3; return;
+    }
+    const sl = slots[k - 1], col = COLS[(k - 1) % COLS.length];
+    const o = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: col, metalness: 0.45, roughness: 0.22, emissive: col, emissiveIntensity: 0.12, transparent: true });
+    const ball = new THREE.Mesh(ballGeo, mat); o.add(ball);
+    const cap = new THREE.Mesh(capGeo, capMat); cap.position.y = 1.05; o.add(cap);
+    o.position.set(sl.x, sl.y, sl.z); o.scale.setScalar(0.001);
+    o.userData = { born: t, base: sl.s, mats: [mat] }; g.add(o); orns.push(o);
+  }
+  function reset() { orns.forEach(o => g.remove(o)); orns = []; star = null; won = false; warm.intensity = 0; }
+  function shake() { shakeT = 0.5; }
+  function strip(cb) {
+    orns.forEach(o => {
+      const d = Math.hypot(o.position.x, o.position.z) || 1;
+      o.userData.fall = { vx: o.position.x / d * (0.6 + Math.random() * 0.8), vz: o.position.z / d * (0.6 + Math.random() * 0.8), vy: 0.8 + Math.random() * 1.2, start: t };
+    });
+    warm.intensity = 0; setTimeout(cb, 2300);
+  }
+  function win() { won = true; }
+
+  const SN = 450, pos = new Float32Array(SN * 3);
+  for (let i = 0; i < SN; i++) { pos[i * 3] = (Math.random() - 0.5) * 11; pos[i * 3 + 1] = Math.random() * 7; pos[i * 3 + 2] = (Math.random() - 0.5) * 8; }
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const flakes = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.05, transparent: true, opacity: 0.85 }));
+  scene.add(flakes);
+
+  const back = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
+    g.rotation.y += dt * (won ? 0.9 : 0.45);
+    if (shakeT > 0) { shakeT -= dt; g.position.x = Math.sin(t * 45) * 0.07 * (shakeT / 0.5); } else g.position.x = 0;
+    for (let i = orns.length - 1; i >= 0; i--) {
+      const o = orns[i], u = o.userData;
+      if (u.fall) {
+        const f = u.fall; f.vy -= 7 * dt;
+        o.position.x += f.vx * dt; o.position.z += f.vz * dt; o.position.y += f.vy * dt;
+        const floor = u.base * 0.9 + 0.02;
+        if (o.position.y < floor) { o.position.y = floor; f.vy = -f.vy * 0.35; f.vx *= 0.6; f.vz *= 0.6; }
+        const age = t - f.start;
+        if (age > 1.2) { const op = Math.max(0, 1 - (age - 1.2) / 0.9); (u.mats || [o.material]).forEach(m => m.opacity = op); }
+        if (age > 2.2) { g.remove(o); orns.splice(i, 1); }
+        continue;
+      }
+      const p = Math.min(1, (t - u.born) / 0.55);
+      o.scale.setScalar(Math.max(0.001, u.base * back(p)));
+      if (won && u.mats) u.mats[0].emissiveIntensity = 0.12 + 0.35 * (0.5 + 0.5 * Math.sin(t * 4 + i));
+    }
+    if (star && !star.userData.fall) { star.material.emissiveIntensity = 0.7 + 0.3 * Math.sin(t * 3); star.rotation.y = -g.rotation.y; }
+    const pa = sg.attributes.position.array;
+    for (let i = 0; i < SN; i++) { pa[i * 3 + 1] -= dt * (0.35 + (i % 5) * 0.08); pa[i * 3] += Math.sin(t + i) * dt * 0.08; if (pa[i * 3 + 1] < 0) pa[i * 3 + 1] = 7; }
+    sg.attributes.position.needsUpdate = true;
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  const ro = new ResizeObserver(() => {
+    const w = fig.clientWidth, h = fig.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h;
+    camera.position.z = w / h < 0.8 ? 10.5 : 8; camera.updateProjectionMatrix();
+  });
+  ro.observe(fig);
+  requestAnimationFrame(frame);
+  return { reset, add, shake, strip, win };
+})();
+
+/* ---------- Gioco ---------- */
+$('lives').innerHTML = Array.from({ length: MAXERR }, () => '<span></span>').join('');
+function hud() {
+  $('cnt').textContent = `${ok} / ${GOAL}`;
+  $('bar').style.width = (ok / GOAL * 100) + '%';
+  $('ecnt').textContent = `${err} / ${MAXERR}`;
+  [...$('lives').children].forEach((s, i) => s.classList.toggle('x', i < err));
+}
+function next() {
+  if (!deck.length) deck = shuffle(Q.slice());
+  cur = deck.pop(); n++;
+  $('tag').textContent = `Domanda ${n}`;
+  $('q').textContent = cur.q;
+  const opts = cur.o.map((txt, i) => ({ txt, good: i === cur.a }));
+  if (!cur.k && cur.o !== VF && cur.o !== SN) shuffle(opts);
+  const box = $('opts'); box.innerHTML = '';
+  opts.forEach(op => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = op.txt; b.dataset.good = op.good ? '1' : '';
+    b.addEventListener('click', () => answer(b));
+    box.appendChild(b);
+  });
+  $('fb').textContent = ''; $('fb').className = 'fb'; $('next').hidden = true;
+}
+function answer(b) {
+  if (over) return;
+  const btns = [...$('opts').children]; btns.forEach(x => x.disabled = true);
+  const good = b.dataset.good === '1';
+  btns.forEach(x => { if (x.dataset.good) x.classList.add('ok'); });
+  const fb = $('fb'); fb.innerHTML = '';
+  const s = document.createElement('strong');
+  if (good) {
+    ok++; tree.add(ok); s.textContent = ok === GOAL ? 'Giusto! Ecco la stella! ' : 'Giusto! '; fb.className = 'fb good';
+  } else {
+    err++; b.classList.add('no'); tree.shake(); s.textContent = 'Non proprio. '; fb.className = 'fb bad';
+    $('card').classList.remove('shake'); void $('card').offsetWidth; $('card').classList.add('shake');
+  }
+  fb.append(s, cur.e); hud();
+  if (ok >= GOAL) { over = true; tree.win(); setTimeout(() => show('Albero completato!', `Hai risposto bene a ${GOAL} domande e il tuo albero è pronto per Natale. Ora sei un esperto di verbi transitivi e intransitivi!`), 1800); return; }
+  if (err >= MAXERR) { over = true; tree.strip(() => show('Game over', `Hai sbagliato ${MAXERR} domande e gli addobbi sono caduti. Avevi messo ${ok} addobbi su ${GOAL}: riprova, puoi farcela!`)); return; }
+  $('next').hidden = false; $('next').focus();
+}
+function show(title, text) { $('oTitle').textContent = title; $('oText').textContent = text; $('over').hidden = false; $('again').focus(); }
+function start() { deck = shuffle(Q.slice()); ok = 0; err = 0; n = 0; over = false; tree.reset(); $('over').hidden = true; hud(); next(); }
+$('next').addEventListener('click', next);
+$('again').addEventListener('click', start);
+start();
+}
+</script>
+</body>
+</html>
